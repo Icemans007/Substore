@@ -1,0 +1,20 @@
+{
+  "name": "cf-worker-substore",
+  "version": "1.0.0",
+  "description": "",
+  "main": "_worker.js",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "build": "wrangler deploy --dry-run",
+    "dev": "wrangler dev --remote",
+    "dev-local": "wrangler dev index.js --remote",
+    "obfuscate": "javascript-obfuscator index.js --output _worker.js --compact true --control-flow-flattening true --control-flow-flattening-threshold 1 --string-array true --string-array-encoding base64 --string-array-threshold 1 --transform-object-keys true --unicode-escape-sequence true"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260307.1",
+    "javascript-obfuscator": "^5.3.0",
+    "wrangler": "^4.71.0"
+  }
+}

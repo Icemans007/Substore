@@ -1,0 +1,11 @@
+name = "cf-worker-substore"
+main = "_worker.js"
+compatibility_date = "2025-05-26"
+# node_compat = true
+workers_dev = true
+
+[vars]
+
+# wrangler.toml (wrangler v3.88.0^)
+[observability.logs]
+enabled = true
