@@ -1,0 +1,64 @@
+name: ⚙️Obfuscate and Commit
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - ".github/**"
+      - ".env.example"
+      - ".eslintrc.cjs"
+      - ".prettierignore"
+      - "fly.toml"
+      - "README.md"
+      - "node.Dockerfile"
+      - "deno.Dockerfile"
+      - "import_map.json"
+      - ".vscode/*"
+      - ".husky/*"
+      - ".prettierrc.json"
+      - "LICENSE"
+      - "run"
+      - ".gitignore"
+  workflow_dispatch:
+
+jobs:
+  obfuscate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "24"
+
+      - name: Install dependencies
+        run: npm install -g javascript-obfuscator
+
+      - name: Obfuscate code
+        run: >
+          javascript-obfuscator index.js --output _worker.js
+          --compact true
+          --simplify true
+          --identifier-names-generator mangled-shuffled
+          --rename-globals true
+          --seed 1
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add _worker.js
+          PREV_MSG=$(git log -1 --pretty=format:"%s" HEAD)
+          git commit -m "Obfuscate _worker.js ($PREV_MSG)" || echo "No changes to commit"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}

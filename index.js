@@ -518,7 +518,7 @@ const SubconverterService = {
         const callbackParams = new URLSearchParams(url.search);
         callbackParams.set("token", newToken);
         callbackParams.delete("target");
-        callbackParams.delete("links");
+        callbackParams.delete("subconverter");
         callbackUrl.search = callbackParams.toString();
 
         // 构造 Subconverter 请求
@@ -569,7 +569,6 @@ const SubconverterService = {
 const Utils = {
     detectTargetType(params, ua) {
         if (params.get('target')) return params.get('target').toLowerCase();
-
         // 检查 UA 是否包含特定关键词
         const check = (keywords) => keywords.some(k => Array.from(params.keys()).map(p => p.toLowerCase()).includes(k) || ua.includes(k));
 
@@ -579,7 +578,6 @@ const Utils = {
         if (check(OBFUSCATED.QU)) return OBFUSCATED.QU[0];
         if (check(OBFUSCATED.LO)) return OBFUSCATED.LO[0];
         if (check(OBFUSCATED.SF)) return OBFUSCATED.SF[0];
-
         if (params.has("raw")) return "raw";
 
         return 'mixed'; // 默认混合模式或 fallback
@@ -735,7 +733,6 @@ function generateHtml(baseUrl, queryString, adminSecret = null) {
             <p class="text-slate-600">快速生成各客户端订阅地址并管理核心配置</p>
             ${isAdmin ? '<span class="px-3 py-1 bg-red-500 text-white rounded-full text-xs font-bold shadow-lg">ADMIN MODE</span>' : ''}
         </header>
-
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             ${clients.map(c => `
             <div class="bg-white/80 p-5 rounded-2xl shadow hover:scale-[1.02] transition border border-white">
@@ -747,17 +744,15 @@ function generateHtml(baseUrl, queryString, adminSecret = null) {
             </div>
             `).join("")}
         </div>
-
         <section class="glass p-6 rounded-2xl shadow-lg border border-white">
             <div class="flex justify-between mb-4">
                 <div class="flex items-center text-blue-700"><i data-lucide="settings" class="mr-2"></i><h2 class="font-bold text-lg">源链接配置 (KV: LINKS)</h2></div>
                 <button onclick="fetchLinks()" class="text-blue-600 font-bold text-sm flex items-center hover:bg-blue-50 px-2 py-1 rounded"><i data-lucide="refresh-cw" size="14" class="mr-1"></i>Refresh</button>
             </div>
             <textarea id="links-editor" rows="10" placeholder="在此输入 SS... 等代理的 URL Schemes 链接或订阅地址(代理行格式)，一行一个..." class="w-full p-4 bg-slate-900 text-green-400 rounded-xl mb-4 font-mono text-sm outline-none focus:ring-2 focus:ring-blue-300"></textarea>
-    
             <div class="flex gap-4">
                 <div class="relative flex-1">
-                    <input type="password" id="admin-secret" placeholder="输入 Signing Secret 进行提交..." value="${adminSecret || ''}" 
+                    <input type="password" id="admin-secret" placeholder="🔒 输入 Signing Secret 进行提交..." value="${adminSecret || ''}" 
                     class="w-full p-3 rounded-xl outline-none shadow-inner bg-white border border-slate-200 focus:border-blue-400"
                    ${isAdmin ? 'readonly' : ''}> ${isAdmin ? '<div class="absolute right-3 top-3 text-green-500 text-xs font-bold"><i data-lucide="check-circle" size="16"></i> Verified</div>' : ''}
                 </div>
@@ -765,22 +760,20 @@ function generateHtml(baseUrl, queryString, adminSecret = null) {
             </div>
         </section>
     </div>
-
     <script>
         const ADMIN_SEC = '${adminSecret || ''}'; // 注入 Secret
         lucide.createIcons();
-
         function copyToClipboard(id) {
             const input = document.getElementById(id);
             input.select();
             document.execCommand('copy');
             alert('链接已成功复制到剪贴板！');
         }
-
         async function fetchLinks() {
-            const s = document.getElementById('admin-secret').value;
+            const s = document.getElementById('admin-secret');
             if (!s && !ADMIN_SEC) {
-                document.getElementById('links-editor').value = "🔒 请输入 Signing Secret 密钥以验证权限.";
+                s.value = "🔒 请输入 Signing Secret 密钥以验证权限！";
+                s.focus();
                 return;
             }
             const btn = event.currentTarget;
@@ -799,7 +792,6 @@ function generateHtml(baseUrl, queryString, adminSecret = null) {
                 btn.classList.remove('animate-spin');
             }
         }
-
         async function updateLinks() {
             const content = document.getElementById('links-editor').value;
             const secret = document.getElementById('admin-secret').value;
@@ -826,11 +818,10 @@ function generateHtml(baseUrl, queryString, adminSecret = null) {
                 alert('请求异常: ' + err.message);
             }
         }
-
         // 页面加载后自动拉取一次
         // window.onload = fetchLinks;
     </script>
 </body>
 </html>
-    `;
+`;
 }
