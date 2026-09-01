@@ -433,6 +433,11 @@ const ProtocolParser = {
                 const userInfoStr = `${method}:${pass}`;
                 const safeUserInfo = Utils.base64UrlEncode(userInfoStr);
 
+                // 修复 SB 内核不兼容 v2ray-plugin 插件问题
+                if (u.searchParams.get('plugin')?.startsWith('v2ray')) {
+                    return null;
+                }
+
                 return {
                     protocol: OBFUSCATED.S5,
                     host: host,
@@ -770,10 +775,9 @@ function generateHtml(baseUrl, queryString, adminSecret = null) {
             alert('链接已成功复制到剪贴板！');
         }
         async function fetchLinks() {
-            const s = document.getElementById('admin-secret');
+            const s = document.getElementById('admin-secret').value;
             if (!s && !ADMIN_SEC) {
-                s.value = "🔒 请输入 Signing Secret 密钥以验证权限！";
-                s.focus();
+                document.getElementById('links-editor').value = "🔒 请输入 Signing Secret 密钥以验证权限.";
                 return;
             }
             const btn = event.currentTarget;
