@@ -589,11 +589,30 @@ const Utils = {
     },
 
     base64Encode(str) {
-        return btoa(String.fromCharCode(...new TextEncoder().encode(str)));
+        const bytes = new TextEncoder().encode(str);
+        let binary = '';
+        const len = bytes.byteLength;
+        // 采用分块处理（每块 8192 字节），既保证了速度，又绝对不会撑爆堆栈
+        const CHUNK_SIZE = 0x2000;
+        for (let i = 0; i < len; i += CHUNK_SIZE) {
+            binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + CHUNK_SIZE, len)));
+        }
+        return btoa(binary);
     },
 
     base64Decode(str) {
-        return new TextDecoder().decode(Uint8Array.from(atob(str), c => c.charCodeAt(0)));
+        let cleaned = str.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
+        const padNeeded = (4 - (cleaned.length % 4)) % 4;
+        if (padNeeded > 0) cleaned += '='.repeat(padNeeded);
+
+        const binaryStr = atob(cleaned);
+        const len = binaryStr.length;
+        const bytes = new Uint8Array(len);
+
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryStr.charCodeAt(i);
+        }
+        return new TextDecoder().decode(bytes);
     },
 
     base64UrlEncode(str) {
