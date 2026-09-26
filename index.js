@@ -315,7 +315,6 @@ const ProxyService = {
 
             if (count > 0) {
                 // 如果重名，添加后缀，例如 "Node 1", "Node 2"
-                // 原逻辑是追加 count，这里微调链接生成
                 p.link = p.link + (p.link.includes('#') ? `%20${count + 1}` : `#${encodeURIComponent(finalTag + ' ' + (count + 1))}`);
             }
             return p.link;
@@ -574,6 +573,7 @@ const SubconverterService = {
 const Utils = {
     detectTargetType(params, ua) {
         if (params.get('target')) return params.get('target').toLowerCase();
+        if (params.has("raw")) return "raw";
         // 检查 UA 是否包含特定关键词
         const check = (keywords) => keywords.some(k => Array.from(params.keys()).map(p => p.toLowerCase()).includes(k) || ua.includes(k));
 
@@ -583,7 +583,6 @@ const Utils = {
         if (check(OBFUSCATED.QU)) return OBFUSCATED.QU[0];
         if (check(OBFUSCATED.LO)) return OBFUSCATED.LO[0];
         if (check(OBFUSCATED.SF)) return OBFUSCATED.SF[0];
-        if (params.has("raw")) return "raw";
 
         return 'mixed'; // 默认混合模式或 fallback
     },
