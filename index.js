@@ -708,7 +708,13 @@ const Utils = {
 
         for (const [real, fake] of maskMap.entries()) {
             // 全局替换：把所有的 fake 换回 real
-            content = content.replaceAll(fake, real);
+            let isIPv6 = real.match(/^\[([a-e\:\d]+)\]$/i);
+            content = content.replaceAll(fake, () => {
+                if (isIPv6){
+                    return isIPv6[1];
+                }
+                return real;
+            });
         }
         return content;
     }
