@@ -638,7 +638,7 @@ const Utils = {
 
     async fetchWithTimeout(url, timeoutMs, ua) {
         const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), timeoutMs);
+        const id = setTimeout(() => timeoutMs > 0 && controller.abort(), timeoutMs);
         try {
             const res = await fetch(url, {
                 headers: { 'User-Agent': ua || DEFAULT_CONFIG.DEFAULT_UA },
@@ -708,7 +708,7 @@ const Utils = {
 
         for (const [real, fake] of maskMap.entries()) {
             // 全局替换：把所有的 fake 换回 real
-            let isIPv6 = real.match(/^\[([a-e\:\d]+)\]$/i);
+            const isIPv6 = real.match(/^\[([a-f\:\d]+)\]$/i);
             content = content.replaceAll(fake, () => {
                 if (isIPv6){
                     return isIPv6[1];
